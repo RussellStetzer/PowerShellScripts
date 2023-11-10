@@ -163,7 +163,6 @@ Try {
         New-Item -ItemType Directory -Path $OutputFileLocation -Confirm:$False -Force
     }
 
-    Write-Output $Results
     $Results | Export-Csv -Path $OutputFile -NoTypeInformation
 }
 

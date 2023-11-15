@@ -51,7 +51,7 @@ Try {
     $OutputFileName = "AD-Object-Cleanup.csv"
     $OutputFile = $OutputFileLocation + $OutputFileName
 
-    $SiteServer = "Your Site Server Here"
+    $Session = New-PSSession -ComputerName "YOUR SITE SERVER"
 
     $AppendDescription = "Automated script" + " - " + (Get-date -Format yyyy/MM/dd)
 
@@ -102,8 +102,6 @@ Try {
 
         If ($ConfigMgrClientAudit -eq $True){
 
-            $Session = New-PSSession -ComputerName $SiteServer
-            
             $CheckExists =  Invoke-Command -Session $session -ScriptBlock {
                                 Import-Module -Name ConfigurationManager
                                 Set-Location -path WWU:

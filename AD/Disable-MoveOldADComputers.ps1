@@ -51,6 +51,8 @@ Try {
     $OutputFileName = "AD-Object-Cleanup.csv"
     $OutputFile = $OutputFileLocation + $OutputFileName
 
+    $SiteServer = "Your Site Server Here"
+
     $AppendDescription = "Automated script" + " - " + (Get-date -Format yyyy/MM/dd)
 
     #Reasons for moving or not
@@ -99,37 +101,20 @@ Try {
         }
 
         If ($ConfigMgrClientAudit -eq $True){
-            # Site configuration
-            $SiteCode = "WWU" # Site code 
-            $ProviderMachineName = "sccmfe1.univ.dir.wwu.edu" # SMS Provider machine name
 
-            # Customizations
-            $initParams = @{}
-            #$initParams.Add("Verbose", $true) # Uncomment this line to enable verbose logging
-            #$initParams.Add("ErrorAction", "Stop") # Uncomment this line to stop the script on any errors
-
-            # Do not change anything below this line
-
-            # Import the ConfigurationManager.psd1 module 
-            if((Get-Module ConfigurationManager) -eq $null) {
-                Import-Module "$($ENV:SMS_ADMIN_UI_PATH)\..\ConfigurationManager.psd1" @initParams 
-            }
-
-            # Connect to the site's drive if it is not already present
-            if((Get-PSDrive -Name $SiteCode -PSProvider CMSite -ErrorAction SilentlyContinue) -eq $null) {
-                New-PSDrive -Name $SiteCode -PSProvider CMSite -Root $ProviderMachineName @initParams
-            }
-
-            # Set the current location to be the site code.
-            Set-Location "$($SiteCode):\" @initParams
-
-            $CheckExists = Get-CMDevice -Name $CurrentComputer.Name | Select Name, IsClient
+            $Session = New-PSSession -ComputerName $SiteServer
+            
+            $CheckExists =  Invoke-Command -Session $session -ScriptBlock {
+                                Import-Module -Name ConfigurationManager
+                                Set-Location -path WWU:
+                                Get-CMDevice -Name $using:CurrentComputer.Name | Select Name, IsClient
+                            }
             
             If ($CheckExists.IsClient -eq 'True'){
                 $FlagIgnore = $True
                 $ObjectResult.CMClientExists = $OutputResult.CMExists
             }
-            
+
         }
         Else{
             $ObjectResult.CMClientExists = $OutputResult.CMIgnore

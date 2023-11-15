@@ -8,10 +8,17 @@
    
    .SYNTAX
    .NOTES
-        $OSManufacturer is only set to WINDOWS since this is a script just for the PC side of the house for now
+		Things to do before you start:
+		
+		Modify any default param values to your liking.
+		Modify $SearchBaseOU to point to which high level OU to start scanning through. I set it default to a test area for a fail safe.
+		Modify $MoveTargetOU to point to where you want objects to move and disable to. 
+		Modify $session to add your Site Server to scan for ConfigMgr integration
+		
+		$OSManufacturer is only set to WINDOWS since this is a script just for the PC side of the house for now
         $AppendDescription I have not set as a parameter for now since we'd like to keep this standardized
-
-        $We can add any new $ObjectResult to add better verbose output logs on action by simply adding a new line in the Hash Table
+        
+		$We can add any new $ObjectResult to add better verbose output logs on action by simply adding a new line in the Hash Table
     .LINK
 #>
 

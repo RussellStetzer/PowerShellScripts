@@ -2,7 +2,7 @@
    .SYNOPSIS
         This script will automatically find on-prem AD objects and move them to a desired location ata certain age back specified.
    .EXAMPLE
-        Disable-MoveOldADComputers.ps1 -WhatIf $False -DesiredDate 180 -SearchBaseOU "OU=Something,OU=Must,OU=Go,OU=In,DC=Here,DC=edu"
+        Disable-MoveOldADComputers.ps1 -WhatIf $False -DesiredDate 180 -SearchBaseOU "OU=Some OU,DC=Some Domain,DC=Goes,DC=Here"
    .PARAMETER 
         -WhatIf is required if you want the script to take any action (use $False to override).  This was set up for a fail safe to force the technician to override.
    
@@ -13,7 +13,7 @@
 		Modify any default param values to your liking.
 		Modify $SearchBaseOU to point to which high level OU to start scanning through. I set it default to a test area for a fail safe.
 		Modify $MoveTargetOU to point to where you want objects to move and disable to. 
-		Modify $session to add your Site Server to scan for ConfigMgr integration
+		Modify $SiteServer and $SiteCode to add your Site Server to scan for ConfigMgr integration
 		
 		$OSManufacturer is only set to WINDOWS since this is a script just for the PC side of the house for now
         $AppendDescription I have not set as a parameter for now since we'd like to keep this standardized
@@ -51,16 +51,24 @@ Try {
     "*Delete*", 
     "*Audit*")
        
-    $DateCutOff = (Get-Date).AddDays(-($DesiredDate))
-    $OSManufacturer = "Windows*"
-
+    #Make sure to fill out all these variables to what you want
     $OutputFileLocation = "C:\Temp\"
     $OutputFileName = "AD-Object-Cleanup.csv"
+    $SiteServer = "CHANGE TO YOUR SITE SERVER NAME"
+    $SiteCode = "YOUR SITE CODES GOES HERE"
+    $OSManufacturer = "Windows*"
+
     $OutputFile = $OutputFileLocation + $OutputFileName
 
-    $Session = New-PSSession -ComputerName "YOUR SITE SERVER"
+    If ($ConfigMgrClientAudit -eq $True){
+        $Session = New-PSSession -ComputerName $SiteServer
+	}
 
     $AppendDescription = "Automated script" + " - " + (Get-date -Format yyyy/MM/dd)
+
+    $OutputFile = $OutputFileLocation + $OutputFileName
+    $Session = New-PSSession -ComputerName $SiteServer
+    $DateCutOff = (Get-Date).AddDays(-($DesiredDate))
 
     #Reasons for moving or not
     $OutputResult = [PSCustomObject]@{
@@ -110,16 +118,16 @@ Try {
         If ($ConfigMgrClientAudit -eq $True){
 
             $CheckExists =  Invoke-Command -Session $session -ScriptBlock {
+                                param($SiteCode)
                                 Import-Module -Name ConfigurationManager
-                                Set-Location -path WWU:
+                                Set-Location -path "$($SiteCode):\"
                                 Get-CMDevice -Name $using:CurrentComputer.Name | Select Name, IsClient
-                            }
+                            } -ArgumentList $SiteCode
             
             If ($CheckExists.IsClient -eq 'True'){
                 $FlagIgnore = $True
                 $ObjectResult.CMClientExists = $OutputResult.CMExists
             }
-
         }
         Else{
             $ObjectResult.CMClientExists = $OutputResult.CMIgnore
@@ -167,6 +175,6 @@ Catch {
         Write-Output "You're not running this script as an Administrator"
     }
     Else{
-        Write-Output "Generic error, check OU pathing"
+        Write-Output "Generic error, check OU pathing, verify SiteServer and SiteCode are set"
     }
 }

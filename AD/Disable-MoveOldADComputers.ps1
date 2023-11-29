@@ -67,7 +67,6 @@ Try {
     $AppendDescription = "Automated script" + " - " + (Get-date -Format yyyy/MM/dd)
 
     $OutputFile = $OutputFileLocation + $OutputFileName
-    $Session = New-PSSession -ComputerName $SiteServer
     $DateCutOff = (Get-Date).AddDays(-($DesiredDate))
 
     #Reasons for moving or not

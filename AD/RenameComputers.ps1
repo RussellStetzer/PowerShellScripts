@@ -43,7 +43,7 @@ Try{
         #Check if system is online, else just output results
         if (Test-Connection -ComputerName $CurrentComputer.CurrentName -Count 1 -ErrorAction SilentlyContinue -Verbose){
             #If online, check for a current user, else just output to results
-            if("quser /SERVER:$CurrentComputer.CurrentName"){
+            if(!"quser /SERVER:$CurrentComputer.CurrentName"){
                 $TryRename = Rename-Computer -ComputerName $CurrentComputer.CurrentName -NewName $CurrentComputer.NewName -DomainCredential $creds -Confirm:$False -Force -PassThru -Restart -Verbose
                 #Verify object renamed, else just output to results
                 if ($TryRename){

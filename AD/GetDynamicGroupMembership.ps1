@@ -1,0 +1,1 @@
+﻿Get-MgGroup -filter "startswith(displayname, 'device.') and groupTypes/any(c:c eq 'DynamicMembership')" | select DisplayName, Membershiprule
